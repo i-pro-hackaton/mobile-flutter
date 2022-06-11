@@ -50,157 +50,149 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
+    /// Для сокрытия элементов интерфейса при открытии клавиатуры
+    final isKeyboard = MediaQuery.of(context).viewInsets.bottom != 0;
     return Scaffold(
       appBar: AppBar(title: const Text("Регистрация")),
       backgroundColor: Colors.white,
-      body: FutureBuilder(
-        future: initSharedPreferencesAuthService(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-            case ConnectionState.active:
-              return const Center(child: CircularProgressIndicator());
-            case ConnectionState.done:
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: <Widget>[
-                    const Text(
-                      "Регистрация",
-                      style: TextStyle(fontSize: 32),
-                    ),
-                    const SizedBox(height: 32),
-                    // TODO: Add dateOfBirth field!!
-                    TextField(
-                      controller: _username,
-                      enableSuggestions: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(hintText: "Логин"),
-                    ),
-                    TextField(
-                      controller: _name,
-                      enableSuggestions: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(hintText: "Имя"),
-                    ),
-                    TextField(
-                      controller: _surname,
-                      enableSuggestions: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.name,
-                      decoration: const InputDecoration(hintText: "Фамилия"),
-                    ),
-                    TextField(
-                      controller: _phone,
-                      enableSuggestions: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
-                      ],
-                      decoration: const InputDecoration(hintText: "Телефон"),
-                    ),
-                    TextField(
-                      controller: _email,
-                      enableSuggestions: true,
-                      autocorrect: false,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration:
-                          const InputDecoration(hintText: "Электронная почта"),
-                    ),
-                    TextField(
-                      controller: _password,
-                      obscureText: !_obscurePassword,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration: const InputDecoration(hintText: "Пароль"),
-                    ),
-                    TextField(
-                      controller: _repeatPassword,
-                      obscureText: !_obscurePassword,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      decoration:
-                          const InputDecoration(hintText: "Повторите пароль"),
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          checkColor: Colors.white,
-                          // fillColor: Colo,
-                          value: _obscurePassword,
-                          onChanged: (bool? value) {
-                            setState(
-                              () {
-                                _obscurePassword = value!;
-                              },
-                            );
-                          },
-                        ),
-                        const Text("Показать пароль"),
-                      ],
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        if (_email.text.isEmpty ||
-                            _password.text.isEmpty ||
-                            _repeatPassword.text.isEmpty) {
-                          return;
-                        }
-                        String username = _username.text;
-                        String name = _name.text;
-                        String surname = _surname.text;
-                        String phone = _phone.text;
-                        String email = _email.text;
-                        String password = _password.text;
-                        String passwordRepeat = _repeatPassword.text;
-                        // Телефон без +7
-                        // TODO: Add dateOfBirth
-                        DateTime dateOfBirth = DateTime.now();
-                        try {
-                          if (password != passwordRepeat) {
-                            throw PasswordVerificationMismatch();
-                          }
-
-                          await _sharedPreferencesAuthService.register(
-                            username: username,
-                            password: password,
-                            name: name,
-                            surname: surname,
-                            email: email,
-                            phone: phone,
-                            dateOfBirth: dateOfBirth,
-                          );
-                          // await showSuccessDialog(
-                          //   context: context,
-                          //   content: '\\(^-^)/ Registration success! Please ',
-                          // );
-                          if (!mounted) return;
-                          await Navigator.of(context).pushNamed(loginRoute);
-                        } catch (e) {
-                          await showErrorDialog(
-                            context: context,
-                            // TODO: Через функцию конвертировать исключение в описание ошибки
-                            content: 'Ошибка регистрации: $e',
-                          );
-                        }
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
+            if (!isKeyboard)
+              const Text(
+                "Регистрация",
+                style: TextStyle(fontSize: 32),
+              ),
+            const SizedBox(height: 32),
+            // TODO: Add dateOfBirth field!!
+            TextField(
+              controller: _username,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+              decoration: const InputDecoration(hintText: "Логин"),
+            ),
+            TextField(
+              controller: _name,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+              decoration: const InputDecoration(hintText: "Имя"),
+            ),
+            TextField(
+              controller: _surname,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.name,
+              decoration: const InputDecoration(hintText: "Фамилия"),
+            ),
+            TextField(
+              controller: _phone,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(10),
+              ],
+              decoration: const InputDecoration(hintText: "Телефон"),
+            ),
+            TextField(
+              controller: _email,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(hintText: "Электронная почта"),
+            ),
+            TextField(
+              controller: _password,
+              obscureText: !_obscurePassword,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(hintText: "Пароль"),
+            ),
+            TextField(
+              controller: _repeatPassword,
+              obscureText: !_obscurePassword,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(hintText: "Повторите пароль"),
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  checkColor: Colors.white,
+                  // fillColor: Colo,
+                  value: _obscurePassword,
+                  onChanged: (bool? value) {
+                    setState(
+                      () {
+                        _obscurePassword = value!;
                       },
-                      child: const Text("Зарегистрироваться"),
-                    ),
-                    // TextButton(
-                    //   onPressed: () async =>
-                    //       await Navigator.of(context).pushNamed(loginRoute),
-                    //   child: const Text("Уже зарегистрированы? Авторизоваться"),
-                    // )
-                  ],
+                    );
+                  },
                 ),
-              );
-          }
-        },
+                const Text("Показать пароль"),
+              ],
+            ),
+            FutureBuilder(
+              future: initSharedPreferencesAuthService(),
+              builder: (context, snapshot) => TextButton(
+                onPressed: () async {
+                  if (_email.text.isEmpty ||
+                      _password.text.isEmpty ||
+                      _repeatPassword.text.isEmpty) {
+                    return;
+                  }
+                  String username = _username.text;
+                  String name = _name.text;
+                  String surname = _surname.text;
+                  String phone = _phone.text;
+                  String email = _email.text;
+                  String password = _password.text;
+                  String passwordRepeat = _repeatPassword.text;
+                  // Телефон без +7
+                  // TODO: Add dateOfBirth
+                  DateTime dateOfBirth = DateTime.now();
+                  try {
+                    if (password != passwordRepeat) {
+                      throw PasswordVerificationMismatch();
+                    }
+
+                    await _sharedPreferencesAuthService.register(
+                      username: username,
+                      password: password,
+                      name: name,
+                      surname: surname,
+                      email: email,
+                      phone: phone,
+                      dateOfBirth: dateOfBirth,
+                    );
+                    // await showSuccessDialog(
+                    //   context: context,
+                    //   content: '\\(^-^)/ Registration success! Please ',
+                    // );
+                    if (!mounted) return;
+                    await Navigator.of(context).pushNamed(loginRoute);
+                  } catch (e) {
+                    await showErrorDialog(
+                      context: context,
+                      // TODO: Через функцию конвертировать исключение в описание ошибки
+                      content: 'Ошибка регистрации: $e',
+                    );
+                  }
+                },
+                child: const Text("Зарегистрироваться"),
+              ),
+            ),
+            // TextButton(
+            //   onPressed: () async =>
+            //       await Navigator.of(context).pushNamed(loginRoute),
+            //   child: const Text("Уже зарегистрированы? Авторизоваться"),
+            // )
+          ],
+        ),
       ),
     );
   }
