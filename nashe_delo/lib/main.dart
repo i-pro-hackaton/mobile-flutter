@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:nashe_delo/constants/routes.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:nashe_delo/views/landing_view.dart';
+import 'package:nashe_delo/widgets/custom_navbar.dart';
 import 'package:nashe_delo/views/main_view.dart';
-import 'package:nashe_delo/views/login_view.dart';
-import 'package:nashe_delo/views/profile_view.dart';
-import 'package:nashe_delo/views/register_view.dart';
-import 'package:nashe_delo/views/teams_view.dart';
+import 'package:nashe_delo/views/registration_view.dart';
 
 void main() {
-  runApp(const MyApp());
+  initializeDateFormatting().then((_) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,12 +20,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
+      initialRoute: 'landing',
       routes: {
-        loginRoute: (context) => const LoginView(),
-        registerRoute: (context) => const RegisterView(),
-        mainRoute: (context) => const MainView(),
-        profileRoute: (context) => const ProfileView(),
-        teamsRoute: (context) => const TeamsView(),
+        'landing': (context) => const LandingView(),
+        'login': (context) => const RegistrationView(),
+        'home': (context) => const CustomNavbar(),
       },
     );
   }

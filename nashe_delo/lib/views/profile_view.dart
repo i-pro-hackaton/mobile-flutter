@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:nashe_delo/constants/routes.dart';
-import 'package:nashe_delo/services/auth/shared_preferences_auth_service.dart';
-import 'package:nashe_delo/services/users/user_service.dart';
-import 'package:nashe_delo/utilities/drawer_builder.dart';
-import 'package:nashe_delo/utilities/show_logout_dialog.dart';
+import 'package:nashe_delo/views/profile_settings_view.dart';
+import 'package:nashe_delo/views/teams_profile_view.dart';
+import 'package:nashe_delo/widgets/custom_tile.dart';
 
-enum ProfileMenuAction {
-  logout,
-}
+import '../widgets/custom_dot.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({Key? key}) : super(key: key);
@@ -17,95 +13,81 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  late final UserService _userService;
-  late final SharedPreferencesAuthService _sharedPreferencesAuthService;
-  bool _sharedPreferencesAuthServiceWasInitialized = false;
-
-  Future<void> initSharedPreferencesAuthService() async {
-    if (_sharedPreferencesAuthServiceWasInitialized) {
-      return;
-    }
-    _sharedPreferencesAuthService = await Future.delayed(
-      // Delay for demonstration purposes
-      const Duration(seconds: 0),
-      () async => await SharedPreferencesAuthService.getInstance(),
-    );
-    _sharedPreferencesAuthServiceWasInitialized = true;
-  }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: initSharedPreferencesAuthService(),
-      builder: (context, snapshot) => Scaffold(
-        drawer: snapshot.connectionState == ConnectionState.done
-            ? getDrawer(context, snapshot, _sharedPreferencesAuthService)
-            : null,
-        appBar: AppBar(
-          title: const Text("Профиль"),
-          actions: [
-            PopupMenuButton<ProfileMenuAction>(
-              itemBuilder: (context) => [
-                const PopupMenuItem<ProfileMenuAction>(
-                  value: ProfileMenuAction.logout,
-                  child: Text("Выйти"),
-                ),
-              ],
-              onSelected: (value) async {
-                switch (value) {
-                  case ProfileMenuAction.logout:
-                    final shouldLogout = await showLogOutDialog(context);
-                    if (shouldLogout) {
-                      // Logout
-                      switch (snapshot.connectionState) {
-                        case ConnectionState.none:
-                        case ConnectionState.waiting:
-                        case ConnectionState.active:
-                          // Might happen but never in usual
-                          break;
-                        case ConnectionState.done:
-                          _sharedPreferencesAuthService.logout();
-                          if (!mounted) return;
-                          await Navigator.of(context).pushNamedAndRemoveUntil(
-                              mainRoute, (route) => false);
-                          break;
-                      }
-                    }
-                    break;
-                }
-              },
-            )
-          ],
-        ),
-        body: Center(child: Builder(
-          builder: (context) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-              case ConnectionState.waiting:
-              case ConnectionState.active:
-                return const CircularProgressIndicator();
-              case ConnectionState.done:
-                String accessKey =
-                    _sharedPreferencesAuthService.currentAccessKey ?? "";
-                if (accessKey.isEmpty) {
-                  // Should not happen at all btw
-                }
-                _userService = UserService.getInstance(accessKey);
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Profile Info"),
-                    FutureBuilder(
-                      future: _userService.getUserData(),
-                      builder: (context, snapshot) => Text(
-                          "UserDict: ${snapshot.connectionState == ConnectionState.done ? snapshot.data.toString() : 'loading'}"),
-                    )
-                  ],
-                );
-            }
-          },
-        )),
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: Colors.white,
+      centerTitle: true,
+      title: const Text(
+        "Профиль",
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 20,
+          color: Color(0xff262626)
+        )
       ),
-    );
-  }
+      actions: [
+        GestureDetector(
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => const ProfileSettingsView()
+                )
+            ),
+            child: Row(
+                children: const [
+                  CustomDot(),
+                  SizedBox(width: 3),
+                  CustomDot(),
+                  SizedBox(width: 3),
+                  CustomDot(),
+                ]
+            )
+        ),
+        const SizedBox(width: 30)
+      ]
+    ),
+    body: Column(
+      children: [
+        Image.asset("images/EgorS.png"),
+        const SizedBox(height: 12),
+        const Text(
+          "Смурыгин Егор",
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            color: Color(0xff262626)
+          )
+        ),
+        const SizedBox(height: 48),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              const CustomTile(image: "request", text: "Мои заявки"),
+              const SizedBox(height: 8),
+              const CustomTile(image: "book", text: "Книжки волонтёра"),
+              const SizedBox(height: 24),
+              const Text(
+                  "Ваши направления",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 20,
+                      color: Color(0xff262626)
+                  )
+              ),
+              const SizedBox(height: 10),
+              Image.asset("images/directions.png"),
+              const SizedBox(height: 43),
+              const CustomTile(image: "about", text: "О приложении"),
+              const SizedBox(height: 8),
+              const CustomTile(image: "help", text: "Написать в техподдержку")
+            ]
+          )
+        )
+      ]
+    )
+  );
 }
